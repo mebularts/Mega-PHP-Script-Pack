@@ -82,7 +82,7 @@
     .fab { width:52px; height:52px; border-radius:999px; display:flex; align-items:center; justify-content:center; background:#141b1b; border:1px solid rgba(21,255,138,.35); box-shadow: 0 6px 24px rgba(0,0,0,.35); }
     .fab:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,.45); }
     .fab i { font-size: 1.35rem; color: var(--brand); }
-    .scrn { aspect-ratio: 16/10; object-fit: cover; border:1px solid rgba(255,255,255,.06); border-radius: 12px; }
+    .scrn { width:100%; height:auto; object-fit:cover; border:1px solid rgba(255,255,255,.06); border-radius:12px; }
     .thumb { cursor: zoom-in; }
     .modal-dark .modal-content { background: #0f1414; border:1px solid rgba(255,255,255,.08); }
     .table-dark th, .table-dark td { border-color: rgba(255,255,255,.08); }
@@ -499,5 +499,31 @@
       ctx.parentElement.style.height = '260px';
     });
   </script>
+
+  <style id="responsive-override">
+  /* Tüm görseller ve canvaslar tam genişlik */
+  img, video, canvas, svg, iframe {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+  }
+
+  /* Kapsayıcılar */
+  .container, .container-xl, .container-fluid {
+    width: 100% !important;
+  }
+
+  /* Hero kart + içindeki görsel alanı */
+  .hero-card, .ratio-16-10, .scrn {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Chart alanı yüksekliği CSS’ten gelsin */
+  .chart-wrap { width:100% !important; height: 220px !important; }
+  @media (min-width:640px){ .chart-wrap{ height:260px !important; } }
+</style>
+
 </body>
 </html>

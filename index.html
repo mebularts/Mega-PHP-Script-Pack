@@ -416,6 +416,25 @@
       </div>
     </div>
   </section>
+  
+<section id="demolar" class="py-16">
+  <div class="container-xl mx-auto px-4">
+    <p class="kicker">Demolar</p>
+    <h2 class="text-3xl md:text-4xl font-extrabold">Tüm Demo Linkleri</h2>
+
+    <div class="mt-6">
+      <input id="demoSearch" type="search" placeholder="Ara: demo adı..."
+             class="form-control bg-transparent text-white border border-white/10"
+             style="max-width:420px" />
+    </div>
+
+    <div id="demolar-grid" class="grid-auto mt-6"></div>
+
+    <div class="text-center mt-8">
+      <button id="loadMore" class="btn btn-outline-brand rounded-pill px-4 py-2">Daha Fazla Göster</button>
+    </div>
+  </div>
+</section>
 
   <section class="py-16">
     <div class="container-xl mx-auto px-4 text-center">
@@ -471,6 +490,92 @@
     ]
   }
   </script>
+
+  <script>
+(async () => {
+  const DATA_URL = 'demolar.json'; // aynı klasörde ise böyle bırak
+  const PLACEHOLDER_IMG = 'https://via.placeholder.com/640x400?text=Demo'; // istersen değiştir
+
+  // Elemanlar
+  const grid = document.getElementById('demolar-grid');
+  const search = document.getElementById('demoSearch');
+  const btnMore = document.getElementById('loadMore');
+
+  // Ayarlar
+  const PAGE_SIZE = 24;   // ilk yükleme ve her "Daha Fazla" tıklamasında kaç adet
+  let data = [];
+  let filtered = [];
+  let cursor = 0;
+
+  // Kart HTML'i
+  const card = (item) => {
+    const name = (item.name || '').toString();
+    const demo = (item.demo || '').toString();
+    const img  = (item.image && item.image.trim() !== '' ? item.image : PLACEHOLDER_IMG);
+
+    return `
+      <div class="glass rounded-xl overflow-hidden border border-white/10 shadow-brand flex flex-col">
+        <a href="${demo}" target="_blank" rel="nofollow noopener" aria-label="${name}">
+          <img class="scrn" src="${img}" alt="${name}" loading="lazy" width="640" height="400" />
+        </a>
+        <div class="p-4 flex-1 flex flex-col">
+          <h3 class="font-semibold text-white text-base line-clamp-2 mb-3" title="${name}">${name}</h3>
+          <div class="mt-auto">
+            <a href="${demo}" target="_blank" rel="nofollow noopener" class="btn btn-brand rounded-pill px-3 py-2">İncele</a>
+          </div>
+        </div>
+      </div>`;
+  };
+
+  function renderMore(reset = false) {
+    if (reset) {
+      grid.innerHTML = '';
+      cursor = 0;
+    }
+    const next = filtered.slice(cursor, cursor + PAGE_SIZE);
+    grid.insertAdjacentHTML('beforeend', next.map(card).join(''));
+    cursor += next.length;
+    // buton görünürlüğü
+    btnMore.style.display = cursor < filtered.length ? 'inline-block' : 'none';
+  }
+
+  function doFilter() {
+    const q = (search.value || '').toLowerCase().trim();
+    if (!q) {
+      filtered = data.slice();
+    } else {
+      filtered = data.filter(it => (it.name || '').toLowerCase().includes(q));
+    }
+    renderMore(true);
+  }
+
+  // Veriyi çek
+  try {
+    const res = await fetch(DATA_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error('JSON okunamadı');
+    data = await res.json();
+
+    // Kolon isimleri farklı geldiyse uyumla (name/demo/image bekleniyor)
+    data = data.map(it => ({
+      name: it.name ?? it['Yazılım Adı'] ?? it['Yazilim Adi'] ?? it['ad'] ?? '',
+      demo: it.demo ?? it['Demo Linki'] ?? it['demo_link'] ?? '',
+      image: it.image ?? it['Görsel Linki'] ?? it['Gorsel Linki'] ?? it['image_link'] ?? ''
+    })).filter(it => it.name && it.demo);
+
+    filtered = data.slice();
+    renderMore(true);
+  } catch (err) {
+    console.error(err);
+    grid.innerHTML = '<div class="text-gray-400">Demolar yüklenemedi. Lütfen daha sonra tekrar deneyin.</div>';
+    btnMore.style.display = 'none';
+  }
+
+  // Eventler
+  btnMore?.addEventListener('click', () => renderMore(false));
+  search?.addEventListener('input', () => doFilter());
+
+})();
+</script>
 
   <script>
     document.getElementById('yil').textContent = new Date().getFullYear();
